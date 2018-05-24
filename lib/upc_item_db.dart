@@ -17,17 +17,17 @@ class UpcItemDB {
   int _lastRequest = 0;
   http.Client _httpClient;
 
-  UpcItemDB() {
-    _httpClient = new http.Client();
-  }
-
   Map<String, String> header = {
     "Accept": "application/json",
     'Content-Type': 'application/json',
     'key_type': "3scale"
   };
 
-  void enablePaidPlan(String key) {
+  UpcItemDB() {
+    _httpClient = new http.Client();
+  }
+
+  UpcItemDB.paid(String key) {
     userKey = key;
     header['user_key'] = userKey;
     trial = false;
@@ -56,8 +56,10 @@ class UpcItemDB {
     _lastRequest = now;
     Map<String, dynamic> data = json.decode(httpResponse.body);
     if (httpResponse.statusCode == 200) {
+      // Item found
       return ItemsResponse.fromJson(data);
     } else {
+      // Exceeded rate limit or item not found
       throw new ErrorResponse.fromJson(data);
     }
   }
@@ -77,7 +79,7 @@ class ItemsResponse {
   }
 }
 
-class ErrorResponse {
+class ErrorResponse implements Exception {
   final String code;
   final String message;
 
